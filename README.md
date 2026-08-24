@@ -2,6 +2,8 @@
 
 An interactive periodic table in a colorful neo-brutalist style. Built with Astro and TypeScript, with all 118 elements bundled locally for fast and reliable access.
 
+The interface is available in English, Swedish, and Greek. A visitor's language choice is stored locally in their browser. Element names were cross-checked against the [Swedish element list](https://periodiskasystemet.nu/grundamnen), Greek educational chemistry materials, and the [Greek element-name reference](https://en.wiktionary.org/wiki/Appendix:Chemical_elements_in_Greek).
+
 ## Local development
 
 Requires Node.js 22 or later.
