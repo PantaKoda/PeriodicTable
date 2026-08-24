@@ -1,0 +1,7 @@
+services:
+  periodic-table:
+    build: .
+    image: periodic-table:latest
+    ports:
+      - "4321:4321"
+    restart: unless-stopped

@@ -1,0 +1,218 @@
+---
+import Layout from '../layouts/Layout.astro'
+import { categoryLabels, elements, type Category } from '../data/elements'
+import '../styles/global.css'
+
+const categories = Object.entries(categoryLabels) as [Category, string][]
+const initial = elements.find((element) => element.number === 6)!
+---
+
+<Layout
+  title="Periodic Table — Explore the Elements"
+  description="An interactive, neo-brutalist periodic table with essential facts for all 118 chemical elements."
+>
+  <main class="page-shell">
+    <header class="masthead">
+      <div>
+        <p class="eyebrow">CHEMISTRY / 118 ELEMENTS</p>
+        <h1>PERIODIC<br /><span>TABLE</span></h1>
+      </div>
+      <div class="masthead-note" aria-label="About this table">
+        <span class="note-arrow" aria-hidden="true">↘</span>
+        <p>Hover, focus, or tap any element to inspect it. Use <kbd>Tab</kbd> to explore by keyboard.</p>
+      </div>
+    </header>
+
+    <section class="controls" aria-label="Table controls">
+      <label class="search-box">
+        <span class="search-icon" aria-hidden="true">⌕</span>
+        <span class="sr-only">Search elements</span>
+        <input id="element-search" type="search" placeholder="Search name, symbol, or number…" autocomplete="off" />
+        <span id="search-count" aria-live="polite">118</span>
+      </label>
+      <button id="random-element" class="brutal-button" type="button">
+        Surprise me <span aria-hidden="true">↗</span>
+      </button>
+    </section>
+
+    <section class="element-inspector" aria-live="polite" aria-label="Selected element details">
+      <div class:list={['inspector-symbol', `category-${initial.category}`]} id="inspector-symbol">
+        <span id="inspector-number">{initial.number}</span>
+        <strong id="inspector-symbol-text">{initial.symbol}</strong>
+      </div>
+      <div class="inspector-copy">
+        <div class="inspector-title-row">
+          <div>
+            <p class="micro-label">CURRENT ELEMENT</p>
+            <h2 id="inspector-name">{initial.name}</h2>
+          </div>
+          <span class:list={['category-chip', `category-${initial.category}`]} id="inspector-category">
+            {categoryLabels[initial.category]}
+          </span>
+        </div>
+        <p class="element-fact" id="inspector-fact">{initial.fact}</p>
+      </div>
+      <dl class="inspector-stats">
+        <div><dt>Atomic mass</dt><dd id="inspector-mass">{initial.mass}</dd></div>
+        <div><dt>Group</dt><dd id="inspector-group">{initial.group ?? '—'}</dd></div>
+        <div><dt>Period</dt><dd id="inspector-period">{initial.period}</dd></div>
+        <div><dt>At 20 °C</dt><dd id="inspector-phase">{initial.phase}</dd></div>
+      </dl>
+    </section>
+
+    <div class="table-scroll" tabindex="0" aria-label="Scrollable periodic table">
+      <div class="periodic-table" id="periodic-table">
+        <div class="series-label lanthanide-label" aria-hidden="true"><span>57–71</span> Lanthanides</div>
+        <div class="series-label actinide-label" aria-hidden="true"><span>89–103</span> Actinides</div>
+        <div class="series-marker lanthanide-marker" aria-hidden="true"><strong>57–71</strong><small>La–Lu</small></div>
+        <div class="series-marker actinide-marker" aria-hidden="true"><strong>89–103</strong><small>Ac–Lr</small></div>
+
+        {elements.map((element) => (
+          <button
+            type="button"
+            class:list={[
+              'element-card',
+              `category-${element.category}`,
+              { 'is-selected': element.number === initial.number },
+            ]}
+            style={`--column:${element.column}; --row:${element.row}`}
+            aria-label={`${element.name}, atomic number ${element.number}`}
+            aria-pressed={element.number === initial.number ? 'true' : 'false'}
+            data-number={element.number}
+            data-symbol={element.symbol}
+            data-name={element.name}
+            data-mass={element.mass}
+            data-category={element.category}
+            data-category-label={categoryLabels[element.category]}
+            data-group={element.group ?? '—'}
+            data-period={element.period}
+            data-phase={element.phase}
+            data-fact={element.fact}
+          >
+            <span class="atomic-number">{element.number}</span>
+            <strong>{element.symbol}</strong>
+            <span class="element-name">{element.name}</span>
+            <span class="atomic-mass">{element.mass}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+    <p class="scroll-note" aria-hidden="true">← Swipe to explore the full table →</p>
+
+    <nav class="legend" aria-label="Filter elements by category">
+      {categories.map(([category, label]) => (
+        <button type="button" class="legend-item" data-filter={category} aria-pressed="false">
+          <span class:list={['legend-swatch', `category-${category}`]}></span>{label}
+        </button>
+      ))}
+      <button type="button" class="legend-clear" id="clear-filter" hidden>Show all</button>
+    </nav>
+
+    <footer>
+      <p>Atomic masses in brackets refer to the mass number of the longest-lived isotope.</p>
+      <p>Built for curious minds <span aria-hidden="true">●</span> 2026</p>
+    </footer>
+  </main>
+
+  <script>
+    const cards = Array.from(document.querySelectorAll<HTMLButtonElement>('.element-card'))
+    const filters = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-filter]'))
+    const search = document.querySelector<HTMLInputElement>('#element-search')!
+    const searchCount = document.querySelector<HTMLElement>('#search-count')!
+    const clearFilter = document.querySelector<HTMLButtonElement>('#clear-filter')!
+    const inspectorSymbol = document.querySelector<HTMLElement>('#inspector-symbol')!
+    const inspectorCategory = document.querySelector<HTMLElement>('#inspector-category')!
+    let activeFilter = ''
+
+    const fields = {
+      number: document.querySelector<HTMLElement>('#inspector-number')!,
+      symbol: document.querySelector<HTMLElement>('#inspector-symbol-text')!,
+      name: document.querySelector<HTMLElement>('#inspector-name')!,
+      fact: document.querySelector<HTMLElement>('#inspector-fact')!,
+      mass: document.querySelector<HTMLElement>('#inspector-mass')!,
+      group: document.querySelector<HTMLElement>('#inspector-group')!,
+      period: document.querySelector<HTMLElement>('#inspector-period')!,
+      phase: document.querySelector<HTMLElement>('#inspector-phase')!,
+    }
+
+    function selectCard(card: HTMLButtonElement, scroll = false) {
+      const data = card.dataset
+      cards.forEach((item) => {
+        const selected = item === card
+        item.classList.toggle('is-selected', selected)
+        item.setAttribute('aria-pressed', String(selected))
+      })
+
+      fields.number.textContent = data.number ?? ''
+      fields.symbol.textContent = data.symbol ?? ''
+      fields.name.textContent = data.name ?? ''
+      fields.fact.textContent = data.fact ?? ''
+      fields.mass.textContent = data.mass ?? ''
+      fields.group.textContent = data.group ?? ''
+      fields.period.textContent = data.period ?? ''
+      fields.phase.textContent = data.phase ?? ''
+      inspectorCategory.textContent = data.categoryLabel ?? ''
+
+      const categoryClasses = Array.from(inspectorSymbol.classList).filter((name) => name.startsWith('category-'))
+      inspectorSymbol.classList.remove(...categoryClasses)
+      inspectorCategory.classList.remove(...Array.from(inspectorCategory.classList).filter((name) => name.startsWith('category-')))
+      inspectorSymbol.classList.add(`category-${data.category}`)
+      inspectorCategory.classList.add(`category-${data.category}`)
+
+      if (scroll) card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+    }
+
+    function applyVisibility() {
+      const query = search.value.trim().toLowerCase()
+      let matches = 0
+
+      cards.forEach((card) => {
+        const searchable = `${card.dataset.name} ${card.dataset.symbol} ${card.dataset.number}`.toLowerCase()
+        const matchesSearch = !query || searchable.includes(query)
+        const matchesFilter = !activeFilter || card.dataset.category === activeFilter
+        const matchesBoth = matchesSearch && matchesFilter
+        card.classList.toggle('is-muted', !matchesBoth)
+        if (matchesBoth) matches += 1
+      })
+      searchCount.textContent = String(matches)
+      clearFilter.hidden = !activeFilter && !query
+    }
+
+    cards.forEach((card) => {
+      card.addEventListener('pointerenter', () => selectCard(card))
+      card.addEventListener('focus', () => selectCard(card))
+      card.addEventListener('click', () => selectCard(card))
+    })
+
+    filters.forEach((filter) => {
+      filter.addEventListener('click', () => {
+        const nextFilter = filter.dataset.filter ?? ''
+        activeFilter = activeFilter === nextFilter ? '' : nextFilter
+        filters.forEach((item) => item.setAttribute('aria-pressed', String(item.dataset.filter === activeFilter)))
+        applyVisibility()
+      })
+    })
+
+    search.addEventListener('input', () => {
+      applyVisibility()
+      const firstMatch = cards.find((card) => !card.classList.contains('is-muted'))
+      if (firstMatch && search.value.trim()) selectCard(firstMatch, true)
+    })
+
+    clearFilter.addEventListener('click', () => {
+      activeFilter = ''
+      search.value = ''
+      filters.forEach((item) => item.setAttribute('aria-pressed', 'false'))
+      applyVisibility()
+      search.focus()
+    })
+
+    document.querySelector<HTMLButtonElement>('#random-element')!.addEventListener('click', () => {
+      const visibleCards = cards.filter((card) => !card.classList.contains('is-muted'))
+      const pool = visibleCards.length ? visibleCards : cards
+      const randomCard = pool[Math.floor(Math.random() * pool.length)]
+      selectCard(randomCard, true)
+      randomCard.focus({ preventScroll: true })
+    })
+  </script>
+</Layout>
