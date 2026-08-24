@@ -17,12 +17,12 @@ An implementation-ready specification for sourced element-context details coveri
 
 ## Decisions so far
 
-<!-- Resolved ticket pointers are appended here. -->
+- [Choose the source and data strategy](./issues/01-source-and-data-strategy.md): bundle original reviewed prose offline with field-level citations, using a hierarchy of first-party scientific and reusable government sources.
+- [Choose the translation and terminology strategy](./issues/02-translation-and-terminology-strategy.md): translate Swedish and Greek independently from a source-backed, concept-locked English master using a versioned glossary and full human review.
 
 ## Not yet specified
 
-- The maintainable ingestion and review workflow cannot be specified until the source strategy and content schema are settled.
-- The exact production batching and validation approach for 118 × 3 localized records depends on the evidence and translation policies.
+- None at this frontier.
 
 ## Out of scope
 
