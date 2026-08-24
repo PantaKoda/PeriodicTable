@@ -85,11 +85,11 @@ const initial = elements.find((element) => element.number === 6)!
             class:list={[
               'element-card',
               `category-${element.category}`,
-              { 'is-selected': element.number === initial.number },
+              { 'is-current': element.number === initial.number },
             ]}
             style={`--column:${element.column}; --row:${element.row}`}
             aria-label={`${element.name}, atomic number ${element.number}`}
-            aria-pressed={element.number === initial.number ? 'true' : 'false'}
+            aria-pressed="false"
             data-number={element.number}
             data-symbol={element.symbol}
             data-name={element.name}
@@ -192,7 +192,8 @@ const initial = elements.find((element) => element.number === 6)!
     const detailsDialog = document.querySelector<HTMLDialogElement>('#element-details')!
     let activeFilter = ''
     let currentLanguage: Language = 'en'
-    let selectedAtomicNumber = 6
+    let currentCard = cards[5]
+    let lockedCard: HTMLButtonElement | null = null
 
     const fields = {
       number: document.querySelector<HTMLElement>('#inspector-number')!,
@@ -240,13 +241,11 @@ const initial = elements.find((element) => element.number === 6)!
       reviewed: document.querySelector<HTMLElement>('#reviewed-date')!,
     }
 
-    function selectCard(card: HTMLButtonElement, scroll = false) {
+    function showCard(card: HTMLButtonElement, scroll = false) {
       const data = card.dataset
-      selectedAtomicNumber = Number(data.number)
+      currentCard = card
       cards.forEach((item) => {
-        const selected = item === card
-        item.classList.toggle('is-selected', selected)
-        item.setAttribute('aria-pressed', String(selected))
+        item.classList.toggle('is-current', item === card)
       })
 
       fields.number.textContent = data.number ?? ''
@@ -266,6 +265,17 @@ const initial = elements.find((element) => element.number === 6)!
       inspectorCategory.classList.add(`category-${data.category}`)
 
       if (scroll) card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+    }
+
+    function lockCard(card: HTMLButtonElement, scroll = false) {
+      lockedCard = card
+      cards.forEach((item) => {
+        const locked = item === card
+        item.classList.toggle('is-selected', locked)
+        item.setAttribute('aria-pressed', String(locked))
+      })
+      text.currentElement.textContent = ui[currentLanguage].lockedElement
+      showCard(card, scroll)
     }
 
     function renderDetails(atomicNumber: number) {
@@ -353,7 +363,7 @@ const initial = elements.find((element) => element.number === 6)!
       search.setAttribute('aria-label', strings.searchLabel)
       search.placeholder = strings.searchPlaceholder
       text.random.textContent = strings.surprise
-      text.currentElement.textContent = strings.currentElement
+      text.currentElement.textContent = lockedCard ? strings.lockedElement : strings.currentElement
       text.atomicMass.textContent = strings.atomicMass
       text.group.textContent = strings.group
       text.period.textContent = strings.period
@@ -398,17 +408,20 @@ const initial = elements.find((element) => element.number === 6)!
         button.setAttribute('aria-label', languageLabels[code])
       })
 
-      const selectedCard = cards.find((card) => card.classList.contains('is-selected')) ?? cards[5]
-      selectCard(selectedCard)
-      if (detailsDialog.open) renderDetails(selectedAtomicNumber)
+      showCard(currentCard)
+      if (detailsDialog.open) renderDetails(Number(currentCard.dataset.number))
       applyVisibility()
       localStorage.setItem('periodic-table-language', language)
     }
 
     cards.forEach((card) => {
-      card.addEventListener('pointerenter', () => selectCard(card))
-      card.addEventListener('focus', () => selectCard(card))
-      card.addEventListener('click', () => selectCard(card))
+      card.addEventListener('pointerenter', () => {
+        if (!lockedCard) showCard(card)
+      })
+      card.addEventListener('focus', () => {
+        if (!lockedCard) showCard(card)
+      })
+      card.addEventListener('click', () => lockCard(card))
     })
 
     filters.forEach((filter) => {
@@ -427,7 +440,7 @@ const initial = elements.find((element) => element.number === 6)!
     search.addEventListener('input', () => {
       applyVisibility()
       const firstMatch = cards.find((card) => !card.classList.contains('is-muted'))
-      if (firstMatch && search.value.trim()) selectCard(firstMatch, true)
+      if (!lockedCard && firstMatch && search.value.trim()) showCard(firstMatch, true)
     })
 
     clearFilter.addEventListener('click', () => {
@@ -442,12 +455,12 @@ const initial = elements.find((element) => element.number === 6)!
       const visibleCards = cards.filter((card) => !card.classList.contains('is-muted'))
       const pool = visibleCards.length ? visibleCards : cards
       const randomCard = pool[Math.floor(Math.random() * pool.length)]
-      selectCard(randomCard, true)
+      lockCard(randomCard, true)
       randomCard.focus({ preventScroll: true })
     })
 
     document.querySelector<HTMLButtonElement>('#open-details')!.addEventListener('click', () => {
-      renderDetails(selectedAtomicNumber)
+      renderDetails(Number(currentCard.dataset.number))
       detailsDialog.showModal()
       document.body.classList.add('has-open-dialog')
     })
