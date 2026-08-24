@@ -4,7 +4,7 @@ Label: wayfinder:map
 
 ## Destination
 
-An implementation-ready specification for sourced element-context details covering all 118 elements in English, Swedish, and Greek, with a responsive detail drawer that preserves the table’s concise hover experience.
+Implemented sourced element-context details covering all 118 elements in English, Swedish, and Greek, with a responsive detail drawer that preserves the table’s concise hover experience.
 
 ## Notes
 
@@ -19,6 +19,11 @@ An implementation-ready specification for sourced element-context details coveri
 
 - [Choose the source and data strategy](./issues/01-source-and-data-strategy.md): bundle original reviewed prose offline with field-level citations, using a hierarchy of first-party scientific and reusable government sources.
 - [Choose the translation and terminology strategy](./issues/02-translation-and-terminology-strategy.md): translate Swedish and Greek independently from a source-backed, concept-locked English master using a versioned glossary and full human review.
+- [Validate the detail drawer information hierarchy](./issues/03-detail-drawer-prototype.md): use one deliberate action, four consistently ordered context cards, then citations and review metadata in a modal drawer/bottom sheet.
+- [Set the editorial and citation policy](./issues/04-editorial-and-citation-policy.md): use short qualified claims, explicit absence/unknown wording, no medical advice, and at least one approved source per field.
+- [Define the element-context data contract](./issues/05-element-context-schema.md): store complete localized text, field-level source IDs, controlled interpretation statuses, and a review date per element.
+- [Adjudicate localized element names](./issues/06-audit-localized-element-names.md): reuse the canonical language tables and standardize the final Greek superheavy names, including `Ογκανέσιο`.
+- [Define the content production and validation workflow](./issues/07-content-production-and-validation.md): author in bounded number ranges and make completeness, translations, source IDs, dates, type-checking, and UI verification release gates.
 
 ## Not yet specified
 

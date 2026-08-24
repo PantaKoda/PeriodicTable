@@ -26,6 +26,14 @@ interface UiStrings {
   bracketNote: string
   builtFor: string
   atomicNumber: string
+  moreDetails: string
+  closeDetails: string
+  occurrenceInNature: string
+  freeFormInNature: string
+  biologicalRole: string
+  commonUses: string
+  sources: string
+  reviewedOn: string
 }
 
 export const languageLabels: Record<Language, string> = {
@@ -59,6 +67,14 @@ export const ui: Record<Language, UiStrings> = {
     bracketNote: 'Atomic masses in brackets refer to the mass number of the longest-lived isotope.',
     builtFor: 'Built for curious minds',
     atomicNumber: 'atomic number',
+    moreDetails: 'More details',
+    closeDetails: 'Close details',
+    occurrenceInNature: 'Occurrence in nature',
+    freeFormInNature: 'Free form in nature',
+    biologicalRole: 'Biological role',
+    commonUses: 'Common uses',
+    sources: 'Sources',
+    reviewedOn: 'Reviewed',
   },
   sv: {
     pageTitle: 'Periodiska systemet — Utforska grundämnena',
@@ -84,6 +100,14 @@ export const ui: Record<Language, UiStrings> = {
     bracketNote: 'Atommassor inom hakparentes avser masstalet för den mest långlivade isotopen.',
     builtFor: 'Skapad för nyfikna sinnen',
     atomicNumber: 'atomnummer',
+    moreDetails: 'Mer information',
+    closeDetails: 'Stäng informationen',
+    occurrenceInNature: 'Förekomst i naturen',
+    freeFormInNature: 'Fri form i naturen',
+    biologicalRole: 'Biologisk roll',
+    commonUses: 'Vanliga användningsområden',
+    sources: 'Källor',
+    reviewedOn: 'Granskad',
   },
   el: {
     pageTitle: 'Περιοδικός πίνακας — Εξερεύνησε τα στοιχεία',
@@ -109,6 +133,14 @@ export const ui: Record<Language, UiStrings> = {
     bracketNote: 'Οι ατομικές μάζες σε αγκύλες αναφέρονται στον μαζικό αριθμό του μακροβιότερου ισοτόπου.',
     builtFor: 'Δημιουργήθηκε για ανήσυχα πνεύματα',
     atomicNumber: 'ατομικός αριθμός',
+    moreDetails: 'Περισσότερες πληροφορίες',
+    closeDetails: 'Κλείσιμο πληροφοριών',
+    occurrenceInNature: 'Παρουσία στη φύση',
+    freeFormInNature: 'Ελεύθερη μορφή στη φύση',
+    biologicalRole: 'Βιολογικός ρόλος',
+    commonUses: 'Συνήθεις χρήσεις',
+    sources: 'Πηγές',
+    reviewedOn: 'Ελέγχθηκε',
   },
 }
 
@@ -167,7 +199,7 @@ const names: Record<Exclude<Language, 'en'>, string[]> = {
     'Θάλλιο', 'Μόλυβδος', 'Βισμούθιο', 'Πολώνιο', 'Άστατο', 'Ραδόνιο', 'Φράγκιο', 'Ράδιο', 'Ακτίνιο', 'Θόριο',
     'Πρωτακτίνιο', 'Ουράνιο', 'Ποσειδώνιο', 'Πλουτώνιο', 'Αμερίκιο', 'Κιούριο', 'Μπερκέλιο', 'Καλιφόρνιο', 'Αϊνσταΐνιο', 'Φέρμιο',
     'Μεντελέβιο', 'Νομπέλιο', 'Λορένσιο', 'Ραδερφόρντιο', 'Ντούμπνιο', 'Σιμπόργκιο', 'Μπόριο', 'Χάσιο', 'Μαϊτνέριο', 'Νταρμστάντιο',
-    'Ρεντγκένιο', 'Κοπερνίκιο', 'Νιχόνιο', 'Φλερόβιο', 'Μοσκόβιο', 'Λιβερμόριο', 'Τενέσιο', 'Ογκανεσόνιο',
+    'Ρεντγκένιο', 'Κοπερνίκιο', 'Νιχόνιο', 'Φλερόβιο', 'Μοσκόβιο', 'Λιβερμόριο', 'Τενέσιο', 'Ογκανέσιο',
   ],
 }
 
