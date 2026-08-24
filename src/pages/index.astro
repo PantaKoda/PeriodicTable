@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro'
 import { categoryLabels, elements, type Category } from '../data/elements'
+import { languageLabels } from '../data/i18n'
 import '../styles/global.css'
 
 const categories = Object.entries(categoryLabels) as [Category, string][]
@@ -12,30 +13,35 @@ const initial = elements.find((element) => element.number === 6)!
   description="An interactive, neo-brutalist periodic table with essential facts for all 118 chemical elements."
 >
   <main class="page-shell">
-    <header class="masthead">
-      <div>
-        <p class="eyebrow">CHEMISTRY / 118 ELEMENTS</p>
-        <h1>PERIODIC<br /><span>TABLE</span></h1>
-      </div>
-      <div class="masthead-note" aria-label="About this table">
-        <span class="note-arrow" aria-hidden="true">↘</span>
-        <p>Hover, focus, or tap any element to inspect it. Use <kbd>Tab</kbd> to explore by keyboard.</p>
-      </div>
-    </header>
-
-    <section class="controls" aria-label="Table controls">
+    <section class="controls" aria-label="Table controls" id="table-controls">
       <label class="search-box">
         <span class="search-icon" aria-hidden="true">⌕</span>
-        <span class="sr-only">Search elements</span>
-        <input id="element-search" type="search" placeholder="Search name, symbol, or number…" autocomplete="off" />
+        <span class="sr-only" id="search-label">Search elements</span>
+        <input id="element-search" type="search" aria-label="Search elements" placeholder="Search name, symbol, or number…" autocomplete="off" />
         <span id="search-count" aria-live="polite">118</span>
       </label>
-      <button id="random-element" class="brutal-button" type="button">
-        Surprise me <span aria-hidden="true">↗</span>
-      </button>
+      <div class="control-actions">
+        <div class="language-switcher" role="group" aria-label="Language" id="language-switcher">
+          {(Object.entries(languageLabels) as [string, string][]).map(([code, label]) => (
+            <button
+              type="button"
+              class="language-button"
+              data-language={code}
+              aria-label={label}
+              title={label}
+              aria-pressed={code === 'en' ? 'true' : 'false'}
+            >
+              {code.toUpperCase()}
+            </button>
+          ))}
+        </div>
+        <button id="random-element" class="brutal-button" type="button">
+          <span id="random-label">Surprise me</span> <span aria-hidden="true">↗</span>
+        </button>
+      </div>
     </section>
 
-    <section class="element-inspector" aria-live="polite" aria-label="Selected element details">
+    <section class="element-inspector" aria-live="polite" aria-label="Selected element details" id="element-inspector">
       <div class:list={['inspector-symbol', `category-${initial.category}`]} id="inspector-symbol">
         <span id="inspector-number">{initial.number}</span>
         <strong id="inspector-symbol-text">{initial.symbol}</strong>
@@ -43,7 +49,7 @@ const initial = elements.find((element) => element.number === 6)!
       <div class="inspector-copy">
         <div class="inspector-title-row">
           <div>
-            <p class="micro-label">CURRENT ELEMENT</p>
+            <p class="micro-label" id="current-element-label">CURRENT ELEMENT</p>
             <h2 id="inspector-name">{initial.name}</h2>
           </div>
           <span class:list={['category-chip', `category-${initial.category}`]} id="inspector-category">
@@ -53,17 +59,17 @@ const initial = elements.find((element) => element.number === 6)!
         <p class="element-fact" id="inspector-fact">{initial.fact}</p>
       </div>
       <dl class="inspector-stats">
-        <div><dt>Atomic mass</dt><dd id="inspector-mass">{initial.mass}</dd></div>
-        <div><dt>Group</dt><dd id="inspector-group">{initial.group ?? '—'}</dd></div>
-        <div><dt>Period</dt><dd id="inspector-period">{initial.period}</dd></div>
-        <div><dt>At 20 °C</dt><dd id="inspector-phase">{initial.phase}</dd></div>
+        <div><dt id="atomic-mass-label">Atomic mass</dt><dd id="inspector-mass">{initial.mass}</dd></div>
+        <div><dt id="group-label">Group</dt><dd id="inspector-group">{initial.group ?? '—'}</dd></div>
+        <div><dt id="period-label">Period</dt><dd id="inspector-period">{initial.period}</dd></div>
+        <div><dt id="phase-label">At 20 °C</dt><dd id="inspector-phase">{initial.phase}</dd></div>
       </dl>
     </section>
 
-    <div class="table-scroll" tabindex="0" aria-label="Scrollable periodic table">
+    <div class="table-scroll" tabindex="0" aria-label="Scrollable periodic table" id="table-scroll">
       <div class="periodic-table" id="periodic-table">
-        <div class="series-label lanthanide-label" aria-hidden="true"><span>57–71</span> Lanthanides</div>
-        <div class="series-label actinide-label" aria-hidden="true"><span>89–103</span> Actinides</div>
+        <div class="series-label lanthanide-label" aria-hidden="true"><span>57–71</span><span id="lanthanides-label">Lanthanides</span></div>
+        <div class="series-label actinide-label" aria-hidden="true"><span>89–103</span><span id="actinides-label">Actinides</span></div>
         <div class="series-marker lanthanide-marker" aria-hidden="true"><strong>57–71</strong><small>La–Lu</small></div>
         <div class="series-marker actinide-marker" aria-hidden="true"><strong>89–103</strong><small>Ac–Lr</small></div>
 
@@ -97,26 +103,37 @@ const initial = elements.find((element) => element.number === 6)!
         ))}
       </div>
     </div>
-    <p class="scroll-note" aria-hidden="true">← Swipe to explore the full table →</p>
+    <p class="scroll-note" aria-hidden="true">← <span id="swipe-label">Swipe to explore the full table</span> →</p>
 
-    <nav class="legend" aria-label="Filter elements by category">
+    <nav class="legend" aria-label="Filter elements by category" id="category-legend">
       {categories.map(([category, label]) => (
         <button type="button" class="legend-item" data-filter={category} aria-pressed="false">
-          <span class:list={['legend-swatch', `category-${category}`]}></span>{label}
+          <span class:list={['legend-swatch', `category-${category}`]}></span><span class="legend-label">{label}</span>
         </button>
       ))}
       <button type="button" class="legend-clear" id="clear-filter" hidden>Show all</button>
     </nav>
 
     <footer>
-      <p>Atomic masses in brackets refer to the mass number of the longest-lived isotope.</p>
-      <p>Built for curious minds <span aria-hidden="true">●</span> 2026</p>
+      <p id="bracket-note">Atomic masses in brackets refer to the mass number of the longest-lived isotope.</p>
+      <p><span id="built-for">Built for curious minds</span> <span aria-hidden="true">●</span> 2026</p>
     </footer>
   </main>
 
   <script>
+    import { elements } from '../data/elements'
+    import {
+      getElementFact,
+      getElementName,
+      languageLabels,
+      localizedCategories,
+      ui,
+      type Language,
+    } from '../data/i18n'
+
     const cards = Array.from(document.querySelectorAll<HTMLButtonElement>('.element-card'))
     const filters = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-filter]'))
+    const languageButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-language]'))
     const search = document.querySelector<HTMLInputElement>('#element-search')!
     const searchCount = document.querySelector<HTMLElement>('#search-count')!
     const clearFilter = document.querySelector<HTMLButtonElement>('#clear-filter')!
@@ -135,6 +152,22 @@ const initial = elements.find((element) => element.number === 6)!
       phase: document.querySelector<HTMLElement>('#inspector-phase')!,
     }
 
+    const text = {
+      searchLabel: document.querySelector<HTMLElement>('#search-label')!,
+      random: document.querySelector<HTMLElement>('#random-label')!,
+      currentElement: document.querySelector<HTMLElement>('#current-element-label')!,
+      atomicMass: document.querySelector<HTMLElement>('#atomic-mass-label')!,
+      group: document.querySelector<HTMLElement>('#group-label')!,
+      period: document.querySelector<HTMLElement>('#period-label')!,
+      phase: document.querySelector<HTMLElement>('#phase-label')!,
+      lanthanides: document.querySelector<HTMLElement>('#lanthanides-label')!,
+      actinides: document.querySelector<HTMLElement>('#actinides-label')!,
+      swipe: document.querySelector<HTMLElement>('#swipe-label')!,
+      clear: document.querySelector<HTMLElement>('#clear-filter')!,
+      bracketNote: document.querySelector<HTMLElement>('#bracket-note')!,
+      builtFor: document.querySelector<HTMLElement>('#built-for')!,
+    }
+
     function selectCard(card: HTMLButtonElement, scroll = false) {
       const data = card.dataset
       cards.forEach((item) => {
@@ -150,24 +183,28 @@ const initial = elements.find((element) => element.number === 6)!
       fields.mass.textContent = data.mass ?? ''
       fields.group.textContent = data.group ?? ''
       fields.period.textContent = data.period ?? ''
-      fields.phase.textContent = data.phase ?? ''
+      fields.phase.textContent = data.phaseLabel ?? data.phase ?? ''
       inspectorCategory.textContent = data.categoryLabel ?? ''
 
-      const categoryClasses = Array.from(inspectorSymbol.classList).filter((name) => name.startsWith('category-'))
+      const categoryClasses = Object.keys(localizedCategories.en).map((category) => `category-${category}`)
       inspectorSymbol.classList.remove(...categoryClasses)
-      inspectorCategory.classList.remove(...Array.from(inspectorCategory.classList).filter((name) => name.startsWith('category-')))
+      inspectorCategory.classList.remove(...categoryClasses)
       inspectorSymbol.classList.add(`category-${data.category}`)
       inspectorCategory.classList.add(`category-${data.category}`)
 
       if (scroll) card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
     }
 
+    function normalizeSearch(value: string) {
+      return value.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
+    }
+
     function applyVisibility() {
-      const query = search.value.trim().toLowerCase()
+      const query = normalizeSearch(search.value.trim())
       let matches = 0
 
       cards.forEach((card) => {
-        const searchable = `${card.dataset.name} ${card.dataset.symbol} ${card.dataset.number}`.toLowerCase()
+        const searchable = normalizeSearch(`${card.dataset.name} ${card.dataset.symbol} ${card.dataset.number}`)
         const matchesSearch = !query || searchable.includes(query)
         const matchesFilter = !activeFilter || card.dataset.category === activeFilter
         const matchesBoth = matchesSearch && matchesFilter
@@ -176,6 +213,65 @@ const initial = elements.find((element) => element.number === 6)!
       })
       searchCount.textContent = String(matches)
       clearFilter.hidden = !activeFilter && !query
+    }
+
+    function setLanguage(language: Language) {
+      const strings = ui[language]
+      document.documentElement.lang = language
+      document.title = strings.pageTitle
+      document.querySelector<HTMLMetaElement>('meta[name="description"]')!.content = strings.description
+
+      text.searchLabel.textContent = strings.searchLabel
+      search.setAttribute('aria-label', strings.searchLabel)
+      search.placeholder = strings.searchPlaceholder
+      text.random.textContent = strings.surprise
+      text.currentElement.textContent = strings.currentElement
+      text.atomicMass.textContent = strings.atomicMass
+      text.group.textContent = strings.group
+      text.period.textContent = strings.period
+      text.phase.textContent = strings.at20
+      text.lanthanides.textContent = strings.lanthanides
+      text.actinides.textContent = strings.actinides
+      text.swipe.textContent = strings.swipe
+      text.clear.textContent = strings.showAll
+      text.bracketNote.textContent = strings.bracketNote
+      text.builtFor.textContent = strings.builtFor
+
+      document.querySelector('#table-controls')!.setAttribute('aria-label', strings.tableControls)
+      document.querySelector('#element-inspector')!.setAttribute('aria-label', strings.selectedDetails)
+      document.querySelector('#table-scroll')!.setAttribute('aria-label', strings.scrollableTable)
+      document.querySelector('#category-legend')!.setAttribute('aria-label', strings.filterElements)
+      document.querySelector('#language-switcher')!.setAttribute('aria-label', strings.language)
+
+      cards.forEach((card) => {
+        const element = elements[Number(card.dataset.number) - 1]
+        const name = getElementName(element, language)
+        const categoryLabel = localizedCategories[language][element.category]
+        const fact = getElementFact(element, language)
+        const phaseLabel = strings.phases[element.phase]
+        card.dataset.name = name
+        card.dataset.categoryLabel = categoryLabel
+        card.dataset.fact = fact
+        card.dataset.phaseLabel = phaseLabel
+        card.querySelector<HTMLElement>('.element-name')!.textContent = name
+        card.setAttribute('aria-label', `${name}, ${strings.atomicNumber} ${element.number}`)
+      })
+
+      filters.forEach((filter) => {
+        const category = filter.dataset.filter as keyof typeof localizedCategories.en
+        filter.querySelector<HTMLElement>('.legend-label')!.textContent = localizedCategories[language][category]
+      })
+
+      languageButtons.forEach((button) => {
+        const code = button.dataset.language as Language
+        button.setAttribute('aria-pressed', String(code === language))
+        button.setAttribute('aria-label', languageLabels[code])
+      })
+
+      const selectedCard = cards.find((card) => card.classList.contains('is-selected')) ?? cards[5]
+      selectCard(selectedCard)
+      applyVisibility()
+      localStorage.setItem('periodic-table-language', language)
     }
 
     cards.forEach((card) => {
@@ -191,6 +287,10 @@ const initial = elements.find((element) => element.number === 6)!
         filters.forEach((item) => item.setAttribute('aria-pressed', String(item.dataset.filter === activeFilter)))
         applyVisibility()
       })
+    })
+
+    languageButtons.forEach((button) => {
+      button.addEventListener('click', () => setLanguage(button.dataset.language as Language))
     })
 
     search.addEventListener('input', () => {
@@ -214,5 +314,8 @@ const initial = elements.find((element) => element.number === 6)!
       selectCard(randomCard, true)
       randomCard.focus({ preventScroll: true })
     })
+
+    const savedLanguage = localStorage.getItem('periodic-table-language')
+    if (savedLanguage === 'sv' || savedLanguage === 'el') setLanguage(savedLanguage)
   </script>
 </Layout>
