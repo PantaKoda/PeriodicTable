@@ -4,6 +4,8 @@ An interactive periodic table in a colorful neo-brutalist style. Built with Astr
 
 The interface is available in English, Swedish, and Greek. A visitor's language choice is stored locally in their browser. Selecting **More details** opens a responsive panel with each element's natural occurrence, whether it occurs in native/free form, biological role, practical uses, and supporting source links.
 
+Hovering or focusing an element previews it in the inspector. Clicking an element locks that selection so later pointer movement cannot replace it; clicking a different element moves the lock.
+
 ## Local development
 
 Requires Node.js 22 or later.

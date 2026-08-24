@@ -10,6 +10,7 @@ interface UiStrings {
   searchPlaceholder: string
   surprise: string
   currentElement: string
+  lockedElement: string
   atomicMass: string
   group: string
   period: string
@@ -51,6 +52,7 @@ export const ui: Record<Language, UiStrings> = {
     searchPlaceholder: 'Search name, symbol, or number…',
     surprise: 'Surprise me',
     currentElement: 'CURRENT ELEMENT',
+    lockedElement: 'LOCKED ELEMENT',
     atomicMass: 'Atomic mass',
     group: 'Group',
     period: 'Period',
@@ -84,6 +86,7 @@ export const ui: Record<Language, UiStrings> = {
     searchPlaceholder: 'Sök efter namn, symbol eller atomnummer…',
     surprise: 'Överraska mig',
     currentElement: 'AKTUELLT GRUNDÄMNE',
+    lockedElement: 'LÅST GRUNDÄMNE',
     atomicMass: 'Atommassa',
     group: 'Grupp',
     period: 'Period',
@@ -117,6 +120,7 @@ export const ui: Record<Language, UiStrings> = {
     searchPlaceholder: 'Αναζήτηση με όνομα, σύμβολο ή ατομικό αριθμό…',
     surprise: 'Έκπληξέ με',
     currentElement: 'ΤΡΕΧΟΝ ΣΤΟΙΧΕΙΟ',
+    lockedElement: 'ΚΛΕΙΔΩΜΕΝΟ ΣΤΟΙΧΕΙΟ',
     atomicMass: 'Ατομική μάζα',
     group: 'Ομάδα',
     period: 'Περίοδος',

@@ -403,6 +403,7 @@ button {
 
 .element-card:hover,
 .element-card:focus-visible,
+.element-card.is-current,
 .element-card.is-selected {
   z-index: 2;
   outline: 0;
