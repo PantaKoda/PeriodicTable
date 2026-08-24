@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro'
 import { categoryLabels, elements, type Category } from '../data/elements'
+import '../data/element-context'
 import { languageLabels } from '../data/i18n'
 import '../styles/global.css'
 
@@ -52,9 +53,14 @@ const initial = elements.find((element) => element.number === 6)!
             <p class="micro-label" id="current-element-label">CURRENT ELEMENT</p>
             <h2 id="inspector-name">{initial.name}</h2>
           </div>
-          <span class:list={['category-chip', `category-${initial.category}`]} id="inspector-category">
-            {categoryLabels[initial.category]}
-          </span>
+          <div class="inspector-actions">
+            <span class:list={['category-chip', `category-${initial.category}`]} id="inspector-category">
+              {categoryLabels[initial.category]}
+            </span>
+            <button class="details-button" id="open-details" type="button">
+              <span id="more-details-label">More details</span> <span aria-hidden="true">→</span>
+            </button>
+          </div>
         </div>
         <p class="element-fact" id="inspector-fact">{initial.fact}</p>
       </div>
@@ -120,7 +126,50 @@ const initial = elements.find((element) => element.number === 6)!
     </footer>
   </main>
 
+  <dialog class="details-dialog" id="element-details" aria-labelledby="details-name">
+    <article class="details-panel">
+      <header class:list={['details-header', `category-${initial.category}`]} id="details-header">
+        <div class="details-identity">
+          <span id="details-number">6</span>
+          <strong id="details-symbol">C</strong>
+          <div>
+            <p id="details-category">Reactive nonmetal</p>
+            <h2 id="details-name">Carbon</h2>
+          </div>
+        </div>
+        <button class="details-close" id="close-details" type="button" aria-label="Close details">×</button>
+      </header>
+      <div class="details-content">
+        <section class="context-section">
+          <span class="context-icon" aria-hidden="true">⌁</span>
+          <div><h3 id="occurrence-title">Occurrence in nature</h3><p id="details-occurrence"></p></div>
+        </section>
+        <section class="context-section">
+          <span class="context-icon" aria-hidden="true">◇</span>
+          <div><h3 id="native-title">Free form in nature</h3><p id="details-native"></p></div>
+        </section>
+        <section class="context-section">
+          <span class="context-icon" aria-hidden="true">✦</span>
+          <div><h3 id="biology-title">Biological role</h3><p id="details-biology"></p></div>
+        </section>
+        <section class="context-section">
+          <span class="context-icon" aria-hidden="true">⚒</span>
+          <div><h3 id="uses-title">Common uses</h3><p id="details-uses"></p></div>
+        </section>
+        <section class="details-sources">
+          <div class="sources-heading">
+            <h3 id="sources-title">Sources</h3>
+            <span id="reviewed-date"></span>
+          </div>
+          <ul id="details-source-list"></ul>
+        </section>
+      </div>
+    </article>
+  </dialog>
+
   <script>
+    import { elementContextByNumber } from '../data/element-context'
+    import { contextSourceById, sourceUrl } from '../data/context-sources'
     import { elements } from '../data/elements'
     import {
       getElementFact,
@@ -139,7 +188,11 @@ const initial = elements.find((element) => element.number === 6)!
     const clearFilter = document.querySelector<HTMLButtonElement>('#clear-filter')!
     const inspectorSymbol = document.querySelector<HTMLElement>('#inspector-symbol')!
     const inspectorCategory = document.querySelector<HTMLElement>('#inspector-category')!
+    const detailsHeader = document.querySelector<HTMLElement>('#details-header')!
+    const detailsDialog = document.querySelector<HTMLDialogElement>('#element-details')!
     let activeFilter = ''
+    let currentLanguage: Language = 'en'
+    let selectedAtomicNumber = 6
 
     const fields = {
       number: document.querySelector<HTMLElement>('#inspector-number')!,
@@ -166,10 +219,30 @@ const initial = elements.find((element) => element.number === 6)!
       clear: document.querySelector<HTMLElement>('#clear-filter')!,
       bracketNote: document.querySelector<HTMLElement>('#bracket-note')!,
       builtFor: document.querySelector<HTMLElement>('#built-for')!,
+      moreDetails: document.querySelector<HTMLElement>('#more-details-label')!,
+    }
+
+    const detailFields = {
+      number: document.querySelector<HTMLElement>('#details-number')!,
+      symbol: document.querySelector<HTMLElement>('#details-symbol')!,
+      category: document.querySelector<HTMLElement>('#details-category')!,
+      name: document.querySelector<HTMLElement>('#details-name')!,
+      occurrenceTitle: document.querySelector<HTMLElement>('#occurrence-title')!,
+      occurrence: document.querySelector<HTMLElement>('#details-occurrence')!,
+      nativeTitle: document.querySelector<HTMLElement>('#native-title')!,
+      native: document.querySelector<HTMLElement>('#details-native')!,
+      biologyTitle: document.querySelector<HTMLElement>('#biology-title')!,
+      biology: document.querySelector<HTMLElement>('#details-biology')!,
+      usesTitle: document.querySelector<HTMLElement>('#uses-title')!,
+      uses: document.querySelector<HTMLElement>('#details-uses')!,
+      sourcesTitle: document.querySelector<HTMLElement>('#sources-title')!,
+      sourceList: document.querySelector<HTMLUListElement>('#details-source-list')!,
+      reviewed: document.querySelector<HTMLElement>('#reviewed-date')!,
     }
 
     function selectCard(card: HTMLButtonElement, scroll = false) {
       const data = card.dataset
+      selectedAtomicNumber = Number(data.number)
       cards.forEach((item) => {
         const selected = item === card
         item.classList.toggle('is-selected', selected)
@@ -195,6 +268,60 @@ const initial = elements.find((element) => element.number === 6)!
       if (scroll) card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
     }
 
+    function renderDetails(atomicNumber: number) {
+      const element = elements[atomicNumber - 1]
+      const context = elementContextByNumber[atomicNumber]
+      const strings = ui[currentLanguage]
+      detailFields.number.textContent = String(atomicNumber)
+      detailFields.symbol.textContent = element.symbol
+      detailFields.category.textContent = localizedCategories[currentLanguage][element.category]
+      detailFields.name.textContent = getElementName(element, currentLanguage)
+      const categoryClasses = Object.keys(localizedCategories.en).map((category) => `category-${category}`)
+      detailsHeader.classList.remove(...categoryClasses)
+      detailsHeader.classList.add(`category-${element.category}`)
+      detailFields.occurrenceTitle.textContent = strings.occurrenceInNature
+      detailFields.occurrence.textContent = context.naturalOccurrence.text[currentLanguage]
+      detailFields.nativeTitle.textContent = strings.freeFormInNature
+      detailFields.native.textContent = context.nativeOccurrence.text[currentLanguage]
+      detailFields.biologyTitle.textContent = strings.biologicalRole
+      detailFields.biology.textContent = context.biologicalRole.text[currentLanguage]
+      detailFields.usesTitle.textContent = strings.commonUses
+      detailFields.uses.textContent = context.commonUses.text[currentLanguage]
+      detailFields.sourcesTitle.textContent = strings.sources
+
+      const locale = currentLanguage === 'sv' ? 'sv-SE' : currentLanguage === 'el' ? 'el-GR' : 'en-GB'
+      const reviewedDate = new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(
+        new Date(`${context.reviewedAt}T12:00:00Z`),
+      )
+      detailFields.reviewed.textContent = `${strings.reviewedOn}: ${reviewedDate}`
+
+      const sourceIds = Array.from(
+        new Set([
+          ...context.naturalOccurrence.sourceIds,
+          ...context.nativeOccurrence.sourceIds,
+          ...context.biologicalRole.sourceIds,
+          ...context.commonUses.sourceIds,
+        ]),
+      )
+      detailFields.sourceList.replaceChildren(
+        ...sourceIds.map((sourceId) => {
+          const source = contextSourceById[sourceId]
+          const item = document.createElement('li')
+          const link = document.createElement('a')
+          link.href = sourceUrl(source, atomicNumber)
+          link.target = '_blank'
+          link.rel = 'noreferrer'
+          link.textContent = source.publisher
+          const arrow = document.createElement('span')
+          arrow.setAttribute('aria-hidden', 'true')
+          arrow.textContent = ' ↗'
+          link.append(arrow)
+          item.append(link)
+          return item
+        }),
+      )
+    }
+
     function normalizeSearch(value: string) {
       return value.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
     }
@@ -216,6 +343,7 @@ const initial = elements.find((element) => element.number === 6)!
     }
 
     function setLanguage(language: Language) {
+      currentLanguage = language
       const strings = ui[language]
       document.documentElement.lang = language
       document.title = strings.pageTitle
@@ -236,6 +364,8 @@ const initial = elements.find((element) => element.number === 6)!
       text.clear.textContent = strings.showAll
       text.bracketNote.textContent = strings.bracketNote
       text.builtFor.textContent = strings.builtFor
+      text.moreDetails.textContent = strings.moreDetails
+      document.querySelector('#close-details')!.setAttribute('aria-label', strings.closeDetails)
 
       document.querySelector('#table-controls')!.setAttribute('aria-label', strings.tableControls)
       document.querySelector('#element-inspector')!.setAttribute('aria-label', strings.selectedDetails)
@@ -270,6 +400,7 @@ const initial = elements.find((element) => element.number === 6)!
 
       const selectedCard = cards.find((card) => card.classList.contains('is-selected')) ?? cards[5]
       selectCard(selectedCard)
+      if (detailsDialog.open) renderDetails(selectedAtomicNumber)
       applyVisibility()
       localStorage.setItem('periodic-table-language', language)
     }
@@ -314,6 +445,18 @@ const initial = elements.find((element) => element.number === 6)!
       selectCard(randomCard, true)
       randomCard.focus({ preventScroll: true })
     })
+
+    document.querySelector<HTMLButtonElement>('#open-details')!.addEventListener('click', () => {
+      renderDetails(selectedAtomicNumber)
+      detailsDialog.showModal()
+      document.body.classList.add('has-open-dialog')
+    })
+
+    document.querySelector<HTMLButtonElement>('#close-details')!.addEventListener('click', () => detailsDialog.close())
+    detailsDialog.addEventListener('click', (event) => {
+      if (event.target === detailsDialog) detailsDialog.close()
+    })
+    detailsDialog.addEventListener('close', () => document.body.classList.remove('has-open-dialog'))
 
     const savedLanguage = localStorage.getItem('periodic-table-language')
     if (savedLanguage === 'sv' || savedLanguage === 'el') setLanguage(savedLanguage)
